@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
+import logging.config
 import random
-from datetime import datetime
 
 from reg_data import token, GROUP_ID
+from log_config import log_config
 
 import vk_api
-import vk_api.bot_longpoll
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 
-class MyVkBotLongPoll(vk_api.bot_longpoll.VkBotLongPoll):
+logging.config.dictConfig(log_config)
+log = logging.getLogger('file_stream')
+users_log = logging.getLogger('users_handler')
+
+
+class MyVkBotLongPoll(VkBotLongPoll):
     def listen(self):
         while True:
             try:
@@ -33,12 +39,13 @@ class Bot:
             try:
                 self.on_event(event=event)
             except Exception as exc:
-                print(exc)
+                log.exception('Ошибка в обработке события')
 
     def on_event(self, event):
-        print(event)
-        if event.type == vk_api.bot_longpoll.VkBotEventType.MESSAGE_NEW:
-            print('Incoming message:', event.object.message['text'])
+        # print(event)
+        if event.type == VkBotEventType.MESSAGE_NEW:
+            log.debug('Отправляем сообщение назад')
+            # print('Incoming message:', event.object.message['text'])
             user = self.api.users.get(user_ids=event.object.message['from_id'], fields='verified')
             sticker = ''
             if event.object.message['attachments']:
@@ -51,16 +58,15 @@ class Bot:
             else:
                 echo_message = f'Здравствуйте, {user[0]["first_name"]}! ' \
                                f'Возвращаю ваше сообщение: {event.object.message["text"] + sticker}'
-            print('Outgoing message:', echo_message)
+            # print('Outgoing message:', echo_message)
             self.api.messages.send(
                 random_id=random.randint(0, 2 ** 40),
                 message=echo_message,
                 peer_id=event.object.message['peer_id']
             )
-            with open(file='logfile.log', mode='a+', encoding='utf-8') as file:
-                file.write(f'user_id: {event.object.message["from_id"]} - {datetime.now()}\n')
+            users_log.info('user_id %s', event.object.message["from_id"])
         else:
-            print('While I can not respond to this event,', event.type)
+            log.info('While I can not respond to this event, %s', event.type)
 
 
 if __name__ == '__main__':
