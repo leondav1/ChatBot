@@ -67,14 +67,14 @@ class Bot:
             sticker = ''
             if event.object.message['attachments']:
                 sticker = 'К сожалению, стикеры возвращать я ещё не умею((('
-            if user[0]["first_name"] == 'Дмитрий':
-                echo_message = f'Привет, {user[0]["first_name"]}! ' \
-                               f'Возвращаю ваше сообщение: {event.object.message["text"] + sticker}' \
-                               f'\nИ, также, напоминаю вам о необходимости оплаты сервера в размере 400 руб.)))' \
-                               f'\nПриятно было тебя услышать!!! 😎'
-            else:
-                echo_message = f'Здравствуйте, {user[0]["first_name"]}! ' \
-                               f'Возвращаю ваше сообщение: {event.object.message["text"] + sticker}'
+            # if user[0]["first_name"] == '':
+            #     echo_message = f'Привет, {user[0]["first_name"]}! ' \
+            #                    f'Возвращаю ваше сообщение: {event.object.message["text"] + sticker}' \
+            #                    f'\nИ, также, напоминаю вам о необходимости оплаты сервера.)))' \
+            #                    f'\nПриятно было тебя услышать!!! 😎'
+            # else:
+            echo_message = f'Здравствуйте, {user[0]["first_name"]}! ' \
+                           f'Возвращаю ваше сообщение: {event.object.message["text"] + sticker}'
             # print('Outgoing message:', echo_message)
             self.api.messages.send(
                 random_id=random.randint(0, 2 ** 40),
